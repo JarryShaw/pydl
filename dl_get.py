@@ -19,8 +19,10 @@ def main():
     username = input('Login: ').strip()
     password = getpass.getpass()
     with requests.Session() as session:
-        session.post('https://jarryshaw.me/_api/v1/user/login',
-                     json=dict(username=username, password=password))
+        login = session.post('https://jarryshaw.me/_api/v1/user/login',
+                             json=dict(username=username, password=password))
+        if login.json()['id'] is None:
+            raise PermissionError('incorrect password')
 
         response = session.get('https://jarryshaw.me/_api/v1/dl')
         if response.status_code != 200:
@@ -34,6 +36,16 @@ def main():
             )
             break
     subprocess.run(['open', WORKDIR])  # pylint: disable=subprocess-run-check
+
+    with requests.Session() as session:
+        login = session.post('https://jarryshaw.me/_api/v1/user/login',
+                             json=dict(username=username, password=password))
+        if login.json()['id'] is None:
+            raise PermissionError('incorrect password')
+
+        response = session.delete('https://jarryshaw.me/_api/v1/dl', data=link)
+        if response.status_code != 200:
+            raise RuntimeError(response)
 
 
 if __name__ == "__main__":
