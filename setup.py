@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import re
 import time
 
 import setuptools
@@ -24,7 +23,7 @@ setup_kwargs = dict(
     long_description=__doc__,
     long_description_content_type='text/markdown',
     python_requires='>=3.8',
-    py_modules=['dl_add', 'dl_get'],
+    py_modules=['dl_add', 'dl_get', 'dl_brew'],
     include_package_data=True,
     zip_safe=False,
     install_requires=[
@@ -39,6 +38,8 @@ setup_kwargs = dict(
         'console_scripts': [
             'dl-add = dl_add:main',
             'dl-get = dl_get:main',
+            'dl-brew = dl_brew:main',
+            'brew-dl = dl_brew:main',
         ],
     },
 )
