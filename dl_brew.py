@@ -18,7 +18,7 @@ password = getpass.getpass()
 
 
 def worker(link):
-    print(link)
+    print(f'+ {link}')
     with requests.Session() as session:
         login = session.post('https://jarryshaw.me/_api/v1/user/login',
                              json=dict(username=username, password=password))
