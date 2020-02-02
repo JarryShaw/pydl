@@ -2,7 +2,6 @@
 
 import contextlib
 import getpass
-import hashlib
 import multiprocessing
 import os
 import subprocess
@@ -12,13 +11,24 @@ import time
 
 import requests
 
+EXIT_SUCCESS = 0
+EXIT_FAILURE = 1
+
 homebrew = os.path.join(subprocess.check_output(['brew', '--cache']).strip().decode(), 'downloads')
 username = input('Login: ').strip()
 password = getpass.getpass()
 
 
-def worker(link):
-    print(f'+ {link}')
+def worker(entry):
+    type_, name, link = entry.casefold().split(':', maxsplit=2)
+    if type_ == 'brew':
+        dst = subprocess.check_output(['brew', '--cache', name]).strip().decode()
+    elif type_ == 'cask':
+        dst = subprocess.check_output(['brew', 'cask', '--cache', name]).strip().decode()
+    else:
+        raise TypeError(f'invalid package type: {type_} (must be `brew` or `cask`)')
+
+    print(f'+ [{type_}] {name} -> {link}')
     with requests.Session() as session:
         login = session.post('https://jarryshaw.me/_api/v1/user/login',
                              json=dict(username=username, password=password))
@@ -42,9 +52,6 @@ def worker(link):
         name = os.listdir(tempdir)[0]
 
         src = os.path.join(tempdir, name)
-        with open(src, 'rb') as file:
-            hash_val = hashlib.sha256(file.read()).hexdigest()
-        dst = os.path.join(homebrew, f'{hash_val}--{name}')
         os.rename(src, dst)
 
     with requests.Session() as session:
@@ -61,10 +68,12 @@ def worker(link):
 def main():
     link_list = set(sys.argv[1:])
     if not link_list:
-        return
+        print(f'usage: {sys.argv[0]} <type>:<name>:<link> ...')
+        return EXIT_FAILURE
 
     with multiprocessing.Pool() as pool:
         pool.map(worker, link_list)
+    return EXIT_SUCCESS
 
 
 if __name__ == "__main__":
