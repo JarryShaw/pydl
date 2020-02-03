@@ -2,6 +2,7 @@
 
 import contextlib
 import getpass
+import hashlib
 import multiprocessing
 import os
 import subprocess
@@ -47,14 +48,16 @@ def worker(entry):
             time.sleep(60)
         link = response.text
 
+    name = hashlib.sha256(response.content).hexdigest()
     with tempfile.TemporaryDirectory(prefix='homebrew-') as tempdir:
         while True:
             with contextlib.suppress(subprocess.CalledProcessError):
-                subprocess.check_call(['aria2c', '--max-connection-per-server=12',
-                                       '--min-split-size=1M', link], cwd=tempdir)
+                subprocess.check_call(['aria2c',
+                                       '--max-connection-per-server=12',
+                                       '--min-split-size=1M',
+                                       '--out', name,
+                                       link], cwd=tempdir)
                 break
-        name = os.listdir(tempdir)[0]
-
         src = os.path.join(tempdir, name)
         os.rename(src, dst)
 
