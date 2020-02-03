@@ -21,6 +21,8 @@ def main():
     with requests.Session() as session:
         login = session.post('https://jarryshaw.me/_api/v1/user/login',
                              json=dict(username=username, password=password))
+        if login.status_code != 200:
+            raise RuntimeError(login)
         if login.json()['id'] is None:
             raise PermissionError('incorrect password')
 
@@ -40,6 +42,8 @@ def main():
     with requests.Session() as session:
         login = session.post('https://jarryshaw.me/_api/v1/user/login',
                              json=dict(username=username, password=password))
+        if login.status_code != 200:
+            raise RuntimeError(login)
         if login.json()['id'] is None:
             raise PermissionError('incorrect password')
 

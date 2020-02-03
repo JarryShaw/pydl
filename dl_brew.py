@@ -19,6 +19,7 @@ def worker(entry):
     item, username, password = entry
     type_, name, link = item.casefold().split(':', maxsplit=2)
 
+    print(f'+ [{type_}] {name} -> {link}')
     if type_ == 'brew':
         dst = subprocess.check_output(['brew', '--cache', name]).strip().decode()
     elif type_ == 'cask':
@@ -26,10 +27,11 @@ def worker(entry):
     else:
         raise TypeError(f'invalid package type: {type_} (must be `brew` or `cask`)')
 
-    print(f'+ [{type_}] {name} -> {link}')
     with requests.Session() as session:
         login = session.post('https://jarryshaw.me/_api/v1/user/login',
                              json=dict(username=username, password=password))
+        if login.status_code != 200:
+            raise RuntimeError(login)
         if login.json()['id'] is None:
             raise PermissionError('incorrect password')
 
@@ -59,6 +61,8 @@ def worker(entry):
     with requests.Session() as session:
         login = session.post('https://jarryshaw.me/_api/v1/user/login',
                              json=dict(username=username, password=password))
+        if login.status_code != 200:
+            raise RuntimeError(login)
         if login.json()['id'] is None:
             raise PermissionError('incorrect password')
 
@@ -76,9 +80,16 @@ def main():
     username = input('Login: ').strip()
     password = getpass.getpass()
 
+    CPU_COUNT = os.getenv('CPU_COUNT')
+    if CPU_COUNT is not None:
+        CPU_COUNT = int(CPU_COUNT)
+
     link_list = sorted((item, username, password) for item in temp_list)
-    with multiprocessing.Pool() as pool:
-        pool.map(worker, link_list)
+    if CPU_COUNT == 1:
+        [worker(entry) for entry in link_list]  # pylint: disable=expression-not-assigned
+    else:
+        with multiprocessing.Pool(processes=CPU_COUNT) as pool:
+            pool.map(worker, link_list)
     return EXIT_SUCCESS
 
 
