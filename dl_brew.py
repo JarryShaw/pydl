@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import warnings
 
 import requests
 
@@ -42,10 +43,13 @@ def worker(entry):
                 if response.status_code == 200:
                     break
 
+                if response.status_code == 408:
+                    print(f'download failed: {link}', file=sys.stderr)
+                    return
                 if response.status_code == 401:
                     session.post('https://jarryshaw.me/_api/v1/user/login',
                                  json=dict(username=username, password=password))
-            time.sleep(60)
+            time.sleep(10)
         link = response.text
 
     name = hashlib.sha256(response.content).hexdigest()
