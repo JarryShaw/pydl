@@ -14,13 +14,11 @@ import requests
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
-homebrew = os.path.join(subprocess.check_output(['brew', '--cache']).strip().decode(), 'downloads')
-username = input('Login: ').strip()
-password = getpass.getpass()
-
 
 def worker(entry):
-    type_, name, link = entry.casefold().split(':', maxsplit=2)
+    item, username, password = entry
+    type_, name, link = item.casefold().split(':', maxsplit=2)
+
     if type_ == 'brew':
         dst = subprocess.check_output(['brew', '--cache', name]).strip().decode()
     elif type_ == 'cask':
@@ -66,11 +64,15 @@ def worker(entry):
 
 
 def main():
-    link_list = set(sys.argv[1:])
-    if not link_list:
+    temp_list = set(sys.argv[1:])
+    if not temp_list:
         print(f'usage: {sys.argv[0]} <type>:<name>:<link> ...')
         return EXIT_FAILURE
 
+    username = input('Login: ').strip()
+    password = getpass.getpass()
+
+    link_list = sorted((item, username, password) for item in temp_list)
     with multiprocessing.Pool() as pool:
         pool.map(worker, link_list)
     return EXIT_SUCCESS
