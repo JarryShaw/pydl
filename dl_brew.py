@@ -38,6 +38,10 @@ def worker(entry):
                 response = session.post('https://jarryshaw.me/_api/v1/brew', data=link)
                 if response.status_code == 200:
                     break
+
+                if response.status_code == 401:
+                    session.post('https://jarryshaw.me/_api/v1/user/login',
+                                 json=dict(username=username, password=password))
             time.sleep(60)
         link = response.text
 
