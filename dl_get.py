@@ -4,7 +4,7 @@
 import contextlib
 import getpass
 import os
-import subprocess
+import subprocess  # nosec
 import sys
 
 import requests
@@ -16,7 +16,7 @@ os.chdir(WORKDIR)
 
 
 def main():
-    username = input('Login: ').strip()
+    username = input('Login: ').strip()  # nosec
     password = getpass.getpass()
     with requests.Session() as session:
         login = session.post('https://jarryshaw.me/_api/v1/user/login',
@@ -33,11 +33,11 @@ def main():
 
     while True:
         with contextlib.suppress(subprocess.CalledProcessError):
-            subprocess.check_call(
+            subprocess.check_call(  # nosec
                 ['aria2c', '--max-connection-per-server=12', '--min-split-size=1M', link]
             )
             break
-    subprocess.run(['open', WORKDIR])  # pylint: disable=subprocess-run-check
+    subprocess.run(['open', WORKDIR])  # pylint: disable=subprocess-run-check  # nosec
 
     with requests.Session() as session:
         login = session.post('https://jarryshaw.me/_api/v1/user/login',

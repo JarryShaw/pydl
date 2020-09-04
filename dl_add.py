@@ -35,7 +35,7 @@ def main():
     if not link_list:
         parser.print_usage()
 
-    username = input('Login: ').strip()
+    username = input('Login: ').strip()  # nosec
     password = getpass.getpass()
     with requests.Session() as session:
         login = session.post('https://jarryshaw.me/_api/v1/user/login',

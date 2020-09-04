@@ -5,7 +5,7 @@ import getpass
 import hashlib
 import multiprocessing
 import os
-import subprocess
+import subprocess  # nosec
 import sys
 import tempfile
 import time
@@ -22,9 +22,9 @@ def worker(entry):
 
     print(f'+ [{type_}] {name} -> {link}')
     if type_ == 'brew':
-        dst = subprocess.check_output(['brew', '--cache', name]).strip().decode()
+        dst = subprocess.check_output(['brew', '--cache', name]).strip().decode()  # nosec
     elif type_ == 'cask':
-        dst = subprocess.check_output(['brew', 'cask', '--cache', name]).strip().decode()
+        dst = subprocess.check_output(['brew', 'cask', '--cache', name]).strip().decode()  # nosec
     else:
         raise TypeError(f'invalid package type: {type_} (must be `brew` or `cask`)')
 
@@ -55,7 +55,7 @@ def worker(entry):
     with tempfile.TemporaryDirectory(prefix='homebrew-') as tempdir:
         while True:
             with contextlib.suppress(subprocess.CalledProcessError):
-                subprocess.check_call(['aria2c',
+                subprocess.check_call(['aria2c',  # nosec
                                        '--max-connection-per-server=12',
                                        '--min-split-size=1M',
                                        '--out', name,
@@ -83,7 +83,7 @@ def main():
         print(f'usage: {sys.argv[0]} <type>:<name>:<link> ...')
         return EXIT_FAILURE
 
-    username = input('Login: ').strip()
+    username = input('Login: ').strip()  # nosec
     password = getpass.getpass()
 
     CPU_COUNT = os.getenv('CPU_COUNT')
