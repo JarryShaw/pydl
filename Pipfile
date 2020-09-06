@@ -17,6 +17,8 @@ verify_ssl = true
 pydl = {editable = true,path = "."}
 ipython = "*"
 autopep8 = "*"
+bandit = "*"
+mypy = "*"
 pylint = "*"
 
 [packages]
