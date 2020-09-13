@@ -21,10 +21,10 @@ def worker(entry):
     type_, name, link = item.casefold().split(':', maxsplit=2)
 
     print(f'+ [{type_}] {name} -> {link}')
-    if type_ == 'brew':
+    if type_ in ('brew', 'cask'):
         dst = subprocess.check_output(['brew', '--cache', name]).strip().decode()  # nosec
-    elif type_ == 'cask':
-        dst = subprocess.check_output(['brew', 'cask', '--cache', name]).strip().decode()  # nosec
+    # elif type_ == 'cask':  # deprecated by Homebrew
+    #     dst = subprocess.check_output(['brew', 'cask', '--cache', name]).strip().decode()  # nosec
     else:
         raise TypeError(f'invalid package type: {type_} (must be `brew` or `cask`)')
 
