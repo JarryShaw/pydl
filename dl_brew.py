@@ -35,25 +35,31 @@ def worker(entry):
             raise RuntimeError(login)
         if login.json()['id'] is None:
             raise PermissionError('incorrect password')
+        print(f'successfully login as {username}', file=sys.stderr)
 
         while True:
-            with contextlib.suppress(requests.exceptions.RequestException):
+            try:
                 response = session.post('https://jarryshaw.me/_api/v1/brew', data=link)
                 if response.status_code == 200:
+                    print('successfully downloaded on remote', file=sys.stderr)
                     break
 
                 if response.status_code == 408:
                     print(f'download failed: {link}', file=sys.stderr)
                     return
                 if response.status_code == 401:
+                    print('login expired; try again', file=sys.stderr)
                     session.post('https://jarryshaw.me/_api/v1/user/login',
                                  json=dict(username=username, password=password))
-            time.sleep(10)
+            except requests.exceptions.RequestException as error:
+                print(f'download failed with {error!r}', file=sys.stderr)
+                time.sleep(10)
         link = response.text
 
     name = hashlib.sha256(response.content).hexdigest()
     with tempfile.TemporaryDirectory(prefix='homebrew-') as tempdir:
         while True:
+            print(f'+ aria2c {link}')
             with contextlib.suppress(subprocess.CalledProcessError):
                 subprocess.check_call(['aria2c',  # nosec
                                        '--max-connection-per-server=12',
