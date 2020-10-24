@@ -54,20 +54,20 @@ def worker(entry):
             except requests.exceptions.RequestException as error:
                 print(f'download failed with {error!r}', file=sys.stderr)
                 time.sleep(10)
-        link = response.text
+        remote_link = response.text
 
-    name = hashlib.sha256(response.content).hexdigest()
+    hash_name = hashlib.sha256(response.content).hexdigest()
     with tempfile.TemporaryDirectory(prefix='homebrew-') as tempdir:
         while True:
-            print(f'+ aria2c {link}')
+            print(f'+ aria2c {remote_link}')
             with contextlib.suppress(subprocess.CalledProcessError):
                 subprocess.check_call(['aria2c',  # nosec
                                        '--max-connection-per-server=12',
                                        '--min-split-size=1M',
-                                       '--out', name,
-                                       link], cwd=tempdir)
+                                       '--out', hash_name,
+                                       remote_link], cwd=tempdir)
                 break
-        src = os.path.join(tempdir, name)
+        src = os.path.join(tempdir, hash_name)
         os.rename(src, dst)
 
     with requests.Session() as session:
@@ -81,6 +81,14 @@ def worker(entry):
         response = session.delete('https://jarryshaw.me/_api/v1/brew', data=link)
         if response.status_code != 200:
             raise RuntimeError(response)
+
+    caches = subprocess.check_output(['brew', '--cache']).strip().decode()  # nosec
+    if type_ == 'cask':
+        caches = os.path.join(caches, 'Cask')
+
+    filename = os.path.split(dst)[1].split('--', maxsplit=1)[1]
+    lnk = os.path.join(caches, filename)
+    os.link(dst, lnk)
 
 
 def main():
