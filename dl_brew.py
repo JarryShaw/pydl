@@ -88,7 +88,7 @@ def worker(entry):
 
     filename = os.path.split(dst)[1].split('--', maxsplit=1)[1]
     lnk = os.path.join(caches, filename)
-    os.link(dst, lnk)
+    os.symlink(dst, lnk)
 
 
 def main():
