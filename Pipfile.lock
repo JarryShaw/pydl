@@ -139,11 +139,11 @@
         },
         "gitpython": {
             "hashes": [
-                "sha256:4f8b0e51713642b83f1eb10136d36a7f2c5278d188c5ae82b144cb1f4e848f0c",
-                "sha256:b923e8952c2fe0d70b129fddd8511acc90b3070c8dddb20d86ca9911a5d0c248"
+                "sha256:26ac35c212d1f7b16036361ca5cff3ec66e11753a0d677fb6c48fa4e1a9dd8d6",
+                "sha256:fc8868f63a2e6d268fb25f481995ba185a85a66fcad126f039323ff6635669ee"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==3.1.25"
+            "version": "==3.1.26"
         },
         "idna": {
             "hashes": [
